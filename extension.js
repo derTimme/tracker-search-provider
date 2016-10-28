@@ -91,25 +91,13 @@ const TrackerSearchProvider = new Lang.Class({
 
             where = ' WHERE {'
                         + '{ ?urn a nfo:' + nfoFileType + ' .'
-                        + ' ?urn fts:match "' + terms_in_sparql + '" }'
+                            + 'FILTER (fn:contains (fn:lower-case(nfo:fileName(?urn)), "'+ terms_in_sparql.toLowerCase() + '"))'
+                        + '}'
                         + ' UNION '
                         + '{ ?urn nao:hasTag ?tag . '
-                            + 'FILTER (fn:contains (fn:lower-case (nao:prefLabel(?tag)), "' + terms + '")) }'
-                            + ' OPTIONAL {'
-                                + ' ?urn nfo:belongsToContainer ?parent .'
-                                + ' ?r2 a nfo:Folder .'
-                                + ' FILTER(?r2 = ?urn) .} .'
-
-                        + ' FILTER(!BOUND(?r2)) .'
-                        + '}';
-
-            /* TODO:
-             *  ?r2 a nfo:Folder . FILTER(?r2 = ?urn). } . FILTER(!BOUND(?r2)
-             *  is supposed to filter out folders, but this fails for 'root'
-             *  folders in which is indexed (as 'Music', 'Documents' and
-             *  so on ...) - WHY?
-             */
-
+                            + 'FILTER (fn:contains (fn:lower-case (nao:prefLabel(?tag)), "' + terms + '")) '
+                        + '}'
+                    + '}';
         } else if (this._categoryType == CategoryType.FILES) {
             // TODO: Do we really want this?
         } else if (this._categoryType == CategoryType.FOLDERS) {
